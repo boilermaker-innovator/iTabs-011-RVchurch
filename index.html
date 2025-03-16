@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finding Community at Riverview Church</title>
+    <style>
+        /* Base styles */
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --accent: #ec4899;
+            --accent-light: #f9a8d4;
+            --light: #f9fafb;
+            --dark: #111827;
+            --gray: #6b7280;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --card-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --popup-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f3f4f6;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        /* Story container */
+        .story-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            position: relative; /* Important for floating icon positioning */
+        }
+        
+        .story-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .story-meta {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .story-date {
+            margin-right: 15px;
+        }
+        
+        .story-author {
+            font-weight: 500;
+        }
+        
+        .story-content p {
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        
+        .story-content h2 {
+            font-size: 22px;
+            margin: 30px 0 15px;
+            color: var(--dark);
+        }
+        
+        .story-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 20px 0;
+            object-fit: cover;
+        }
+        
+        /* Floating church icon */
+        .floating-church-icon {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            border-radius: 50%;
+            box-shadow: var(--popup-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 36px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .floating-church-icon:hover {
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+        }
+        
+        .pulse-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.7);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+        
+        /* Church card popup */
+        .church-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .church-popup.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .popup-content {
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--popup-shadow);
+            transform: translateY(30px);
+            transition: transform 0.4s;
+        }
+        
+        .church-popup.active .popup-content {
+            transform: translateY(0);
+        }
+        
+        /* Card header */
+        .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            padding: 25px 20px;
+            position: relative;
+            text-align: center;
+        }
+        
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card-title .emoji {
+            margin-right: 10px;
+            font-size: 28px;
+        }
+        
+        .card-subtitle {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            opacity: 0.8;
+            height: 30px;
+            width: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-button:hover {
+            transform: scale(1.2);
+            opacity: 1;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Tabs */
+        .card-tabs {
+            display: flex;
+            background-color: #f5f7fb;
+            border-bottom: none;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 16px 5px;
+            text-align: center;
+            color: var(--gray);
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab:hover {
+            color: var(--primary);
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background-color: white;
+        }
+        
+        /* Content areas */
+        .tab-content {
+            padding: 25px;
+            display: none;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeUp 0.5s ease;
+        }
+        
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Services Tab Enhancement */
+        .welcome-banner {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .welcome-emoji {
+            font-size: 48px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        
+        .welcome-text {
+            font-size: 16px;
+            color: var(--dark);
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        
+        .service-times {
+            background: linear-gradient(to right, rgba(79, 70, 229, 0.1), rgba(236, 72, 153, 0.1));
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .service-header {
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--primary-dark);
+            font-size: 16px;
+        }
+        
+        .service-time {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+        
+        .service-time:last-child {
+            margin-bottom: 0;
+        }
+        
+        .time-icon {
+            margin-right: 12px;
+            color: var(--primary);
+            font-size: 18px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(79, 70, 229, 0.1);
+            border-radius: 50%;
+        }
+        
+        .location-section {
+            margin-top: 25px;
+            background-color: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .location-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+        }
+        
+        .location-title::before {
+            content: "📍";
+            margin-right: 8px;
+        }
+        
+        .location-address {
+            font-size: 15px;
+            color: var(--gray);
+            margin-bottom: 15px;
+            padding-left: 24px;
+        }
+        
+        .map-button {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.25);
+            transition: all 0.2s;
+        }
+        
+        .map-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(79, 70, 229, 0.3);
+            background: var(--primary-dark);
+        }
+        
+        /* Programs Tab Enhancement */
+        .program-list {
+            list-style: none;
+        }
+        
+        .program-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            background-color: var(--light);
+            border-left: 4px solid var(--primary);
+            transition: transform 0.2s;
+        }
+        
+        .program-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .program-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .program-name {
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 5px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .program-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        .program-time {
+            color: var(--gray);
+            font-size: 14px;
+            padding-left: 28px;
+        }
+        
+        /* Connect Tab Enhancement */
+        .connect-cta {
+            text-align: center;
+            margin-bottom: 25px;
+            background: linear-gradient(to right, rgba(79, 70, 229, 0.1), rgba(236, 72, 153, 0.1));
+            border-radius: 12px;
+            padding: 25px 20px;
+        }
+        
+        .connect-title {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--primary-dark);
+        }
+        
+        .thumbs-up-container {
+            font-size: 48px;
+            cursor: pointer;
+            transition: transform 0.3s ease, text-shadow 0.3s;
+            display: inline-block;
+            margin-bottom: 10px;
+            background: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .thumbs-up-container:hover {
+            transform: scale(1.1) translateY(-5px);
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .church-contact {
+            margin-top: 25px;
+            background-color: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .contact-title {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+        }
+        
+        .contact-title::before {
+            content: "📞";
+            margin-right: 8px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 15px;
+            padding-left: 10px;
+        }
+        
+        .contact-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .contact-icon {
+            margin-right: 12px;
+            color: var(--primary);
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Card footer */
+        .card-footer {
+            padding: 20px;
+            background: var(--light);
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        
+        .visit-button {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+            font-size: 16px;
+        }
+        
+        .visit-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(79, 70, 229, 0.3);
+        }
+        
+        /* Colorful Confirmation Popup */
+        .confirmation-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .confirmation-popup.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .confirmation-content {
+            background: linear-gradient(135deg, #4f46e5 0%, #ec4899 100%);
+            width: 90%;
+            max-width: 350px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            padding: 35px 25px;
+            text-align: center;
+            color: white;
+            transform: scale(0.9);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .confirmation-popup.active .confirmation-content {
+            transform: scale(1);
+        }
+        
+        .confirmation-emoji {
+            font-size: 72px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: bounce 1s ease infinite alternate;
+        }
+        
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-15px); }
+        }
+        
+        .confirmation-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .confirmation-message {
+            font-size: 18px;
+            margin-bottom: 25px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        
+        .confirmation-button {
+            background: white;
+            color: var(--primary);
+            border: none;
+            padding: 14px 30px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s;
+        }
+        
+        .confirmation-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Story Content -->
+    <div class="story-container">
+        <h1 class="story-title">Finding Community in Faith: My Journey to Riverview Church</h1>
+        <div class="story-meta">
+            <span class="story-date">March 15, 2025</span>
+            <span class="story-author">By Jessica Matthews</span>
+        </div>
+        
+        <div class="story-content">
+            <p>When I first moved to Perth last year, I felt lost in a sea of unfamiliar faces. Moving across the country meant leaving behind my support network of family and friends. I found myself in a beautiful city, but without the connections that make a place feel like home.</p>
+            
+            <p>For the first few months, I focused on settling into my new job and apartment. Weekends were spent exploring local cafes and parks, but something was missing. I craved meaningful connections and a sense of belonging that seemed just out of reach.</p>
+            
+            <img src="https://images.unsplash.com/photo-1438232992991-995b7058bbb3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Church worship service" class="story-image">
+            
+            <h2>A Warm Welcome</h2>
+            <p>One Sunday morning, at the recommendation of a colleague, I decided to visit Riverview Church. I remember feeling nervous as I approached the building, not knowing what to expect. Would I feel out of place? Would people notice I was new but keep their distance?</p>
+            
+            <p>Those worries melted away almost immediately. Before I even reached the main entrance, a friendly greeter welcomed me with a warm smile. "First time at Riverview?" she asked. When I nodded, she offered to show me around and introduced me to a few regular attendees who were my age.</p>
+            
+            <h2>More Than Just Sunday Service</h2>
+            <p>What started as a casual Sunday visit soon became the highlight of my week. The worship was uplifting, and the messages were relevant to challenges I was facing in my own life. But what truly surprised me was how quickly I found myself becoming part of the community.</p>
+            
+            <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Small group meeting" class="story-image">
+            
+            <p>After a few weeks, I joined a small group that meets on Wednesday evenings. We discuss the Sunday message, share our experiences, and support each other through life's ups and downs. These weekly gatherings have become a safe space where I can be vulnerable and authentic.</p>
+            
+            <h2>Finding Purpose Through Service</h2>
+            <p>As I became more involved, I discovered opportunities to serve that aligned with my skills and interests. Now I volunteer with the youth ministry twice a month, helping teenagers navigate the same questions about faith and identity that I once struggled with.</p>
+            
+            <p>There's something powerful about being part of something bigger than yourself. The sense of purpose I've found through serving others has added a dimension to my life that I didn't even know was missing.</p>
+            
+            <img src="https://images.unsplash.com/photo-1529070538774-1843cb3265df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Volunteers serving together" class="story-image">
+            
+            <h2>A Place to Call Home</h2>
+            <p>It's been a year since my first visit to Riverview Church, and what a transformative year it's been. I've found not just a place to worship on Sundays, but a community that feels like family. The friendships I've formed extend beyond church walls—we celebrate birthdays together, help each other move apartments, and show up for one another during difficult times.</p>
+            
+            <p>If you're new to the area or simply searching for community, I can't recommend Riverview enough. Whether you're a lifelong churchgoer or someone who's curious but hesitant, you'll find a place where you are welcomed exactly as you are.</p>
+            
+            <p>Sometimes finding home isn't about a physical location—it's about finding people who make you feel like you belong. That's what Riverview has been for me, and I'm grateful every day for the community I've found here.</p>
+        </div>
+    </div>
+    
+    <!-- Floating Church Icon -->
+    <div class="floating-church-icon" id="churchIcon">
+        💒
+        <div class="pulse-animation"></div>
+    </div>
+    
+    <!-- Church Popup -->
+    <div class="church-popup" id="churchPopup">
+        <div class="popup-content">
+            <div class="card-header">
+                <h1 class="card-title"><span class="emoji">💒</span> Riverview Church</h1>
+                <div class="card-subtitle">Join us this Sunday!</div>
+                <button class="close-button" id="closePopup">&times;</button>
+            </div>
+            
+            <div class="card-tabs">
+                <button class="tab active" data-tab="services">Services</button>
+                <button class="tab" data-tab="programs">Programs</button>
+                <button class="tab" data-tab="connect">Connect</button>
+            </div>
+            
+            <!-- Services Tab - Enhanced -->
+            <div class="tab-content active" id="services-content">
+                <div class="welcome-banner">
+                    <div class="welcome-emoji">🙏</div>
+                    <div class="welcome-text">We'd love to see you at one of our services!</div>
+                </div>
+                
+                <div class="service-times">
+                    <div class="service-header">Sunday Worship</div>
+                    <div class="service-time">
+                        <span class="time-icon">⏰</span>
+                        <span>8:30 AM - Family Service</span>
+                    </div>
+                    <div class="service-time">
+                        <span class="time-icon">⏰</span>
+                        <span>10:30 AM - Contemporary Service</span>
+                    </div>
+                    <div class="service-time">
+                        <span class="time-icon">⏰</span>
+                        <span>6:00 PM - Evening Service</span>
+                    </div>
+                </div>
+                
+                <div class="location-section">
+                    <div class="location-title">Our Location</div>
+                    <div class="location-address">1 Thorogood St, Burswood WA 6100</div>
+                    <a href="https://maps.app.goo.gl/example" target="_blank" class="map-button">Get Directions</a>
+                </div>
+            </div>
+            
+            <!-- Programs Tab - Enhanced -->
+            <div class="tab-content" id="programs-content">
+                <ul class="program-list">
+                    <li class="program-item">
+                        <div class="program-name">
+                            <span class="program-icon">👧👦</span> Youth Group
+                        </div>
+                        <div class="program-time">Friday nights, 7:00-9:00 PM</div>
+                    </li>
+                    <li class="program-item">
+                        <div class="program-name">
+                            <span class="program-icon">👪</span> Small Groups
+                        </div>
+                        <div class="program-time">Various times throughout the week</div>
+                    </li>
+                    <li class="program-item">
+                        <div class="program-name">
+                            <span class="program-icon">🙏</span> Prayer Meeting
+                        </div>
+                        <div class="program-time">Wednesday, 6:30-7:30 AM</div>
+                    </li>
+                    <li class="program-item">
+                        <div class="program-name">
+                            <span class="program-icon">👩</span> Women's Ministry
+                        </div>
+                        <div class="program-time">2nd Tuesday each month, 9:30 AM</div>
+                    </li>
+                    <li class="program-item">
+                        <div class="program-name">
+                            <span class="program-icon">👨</span> Men's Fellowship
+                        </div>
+                        <div class="program-time">1st Saturday each month, 8:00 AM</div>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Connect Tab - Enhanced -->
+            <div class="tab-content" id="connect-content">
+                <div class="connect-cta">
+                    <div class="connect-title">Will you join us this Sunday?</div>
+                    <div class="thumbs-up-container" id="thumbsUpButton">👍</div>
+                    <p>Tap the thumbs up to let us know!</p>
+                </div>
+                
+                <div class="church-contact">
+                    <div class="contact-title">Contact Us</div>
+                    <div class="contact-item">
+                        <span class="contact-icon">📞</span>
+                        <span>(08) 9361 1377</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">📧</span>
+                        <span>info@riverviewchurch.com.au</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">🌐</span>
+                        <span>www.riverviewchurch.com.au</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <a href="https://www.riverviewchurch.com.au/" target="_blank" class="visit-button">Visit Website</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Colorful Confirmation Popup -->
+    <div class="confirmation-popup" id="confirmationPopup">
+        <div class="confirmation-content">
+            <div class="confirmation-emoji">🎉</div>
+            <h3 class="confirmation-title">See you on Sunday!</h3>
+            <p class="confirmation-message">We're excited to welcome you to Riverview Church. Our team will be ready to greet you!</p>
+            <button class="confirmation-button" id="confirmationButton">Got it!</button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Floating icon and popup functionality
+            const churchIcon = document.getElementById('churchIcon');
+            const churchPopup = document.getElementById('churchPopup');
+            const closePopup = document.getElementById('closePopup');
+            
+            // Open popup when icon is clicked
+            churchIcon.addEventListener('click', function() {
+                churchPopup.classList.add('active');
+            });
+            
+            // Close popup when close button is clicked
+            closePopup.addEventListener('click', function() {
+                churchPopup.classList.remove('active');
+            });
+            
+            // Close popup when clicking outside
+            churchPopup.addEventListener('click', function(e) {
+                if (e.target === churchPopup) {
+                    churchPopup.classList.remove('active');
+                }
+            });
+            
+            // Tab switching functionality
+            const tabs = document.querySelectorAll('.tab');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Get the tab content ID
+                    const tabId = this.getAttribute('
